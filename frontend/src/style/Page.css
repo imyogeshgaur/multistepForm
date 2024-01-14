@@ -1,0 +1,14 @@
+#form{
+  width:400px;
+  margin: auto;
+  margin-top: 100px;
+  border-radius:10%;
+  background-color: rgb(41, 41, 41);
+  padding:5rem 5rem;
+}
+*{
+  background-color: black;
+}
+a{
+  color:rgb(75, 233, 233)
+}
