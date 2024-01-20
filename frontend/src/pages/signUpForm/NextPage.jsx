@@ -1,15 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { errorOccurred, storeValuesLastPage } from '../redux/UserSlice';
-import TextInput from '../components/TextInput';
-import "../style/Page.css"
-import Button from '../components/Button';
-import { commonButtonStyle, commonStyleInput, highlightButtonStyle } from '../style/CommonStyle';
-import { pinCodeValidator } from '../validator/Validator';
+import { errorOccurred, storeValuesLastPage } from '../../redux/UserSlice';
+import TextInput from '../../components/TextInput';
+import Button from '../../components/Button';
+import { commonButtonStyle, commonStyleInput, highlightButtonStyle } from '../../style/CommonStyle';
+import { pinCodeValidator } from '../../validator/Validator';
+import callAPIOnButtonClick from '../../api/apiCall';
+import { signUpApiURL } from '../../constants/API_URL';
 
 const NextPage = () => {
   const dispatch = useDispatch();
-
+  const userData = useSelector((state) => state.user);
   const [data, setData] = useState({
     addressLine1: "",
     addressLine2: "",
@@ -64,28 +65,35 @@ const NextPage = () => {
   !data.addressLine1 || !data.addressLine2 || !data.pinCode || !data.city ? data.btnDisabled = true : data.btnDisabled = false;
 
   const handleSubmit = () => {
-    if (!data.addressLine1 || !data.addressLine2 || !data.city || !data.pinCode) {
-      dispatch(errorOccurred({
-        errorMessage: "Please fill all Fields"
-      }))
-    }
-
     const isValidPinCode = pinCodeValidator(data.pinCode);
 
-    if (isValidPinCode) {
-      dispatch(storeValuesLastPage({
-        addressLine1: data.addressLine1,
-        addressLine2: data.addressLine2,
-        city: data.city,
-        pinCode: data.pinCode,
-      }))
-      
-    } else {
+    if (!isValidPinCode) {
       dispatch(errorOccurred({
         errorMessage: "Pin Code is Invalid !!!"
       }))
+      return
     }
+
+    dispatch(storeValuesLastPage({
+      addressLine1: data.addressLine1,
+      addressLine2: data.addressLine2,
+      city: data.city,
+      pinCode: data.pinCode,
+    }))
   }
+
+  useEffect(() => {
+    if (userData.pinCode && userData.errorMessage === "") {
+      callAPIOnButtonClick("POST", signUpApiURL, userData).then((backendResponse) => {
+        if (backendResponse.statusFromBackend === 200) {
+          console.log(backendResponse.dataFromBackend)
+        } else {
+          console.log(backendResponse.dataFromBackend)
+        }
+      }).catch(err => console.log(err))
+    }
+    data.btnDisabled = true
+  }, [userData])
 
   return (
     <div id="form">

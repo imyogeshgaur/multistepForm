@@ -5,7 +5,7 @@ const TextInput = (props) => {
         <>
             {
                 props.component ?
-                    <div style={{display:"flex"}}>
+                    <div style={{ display: "flex" }}>
                         <input
                             type={props.type}
                             name={props.name}
@@ -13,6 +13,7 @@ const TextInput = (props) => {
                             style={props.style}
                             value={props.value}
                             onChange={props.onChange}
+                            {...props}
                         />
                         {props.component}
                     </div>

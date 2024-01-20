@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import Routes from './routes'
 import { useRoutes } from 'react-router'
-
+import "./style/Page.css"
 function App() {
   const routes = useRoutes(Routes);
   return (

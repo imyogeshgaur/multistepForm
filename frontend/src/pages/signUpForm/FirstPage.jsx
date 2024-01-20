@@ -1,17 +1,17 @@
-import { useState } from 'react'
-import { phoneNumberValidator, passwordValidator, emailValidator } from '../validator/Validator'
-import { useDispatch } from 'react-redux'
-import { errorOccurred, storeValuesFirstPage } from '../redux/UserSlice'
+import { useState, useEffect } from 'react'
+import { phoneNumberValidator, passwordValidator, emailValidator } from '../../validator/Validator'
+import { useDispatch, useSelector } from 'react-redux'
+import { errorOccurred, storeValuesFirstPage } from '../../redux/UserSlice'
 import { useNavigate } from 'react-router'
-import TextInput from '../components/TextInput'
-import Button from '../components/Button'
-import { commonButtonStyle, commonStyleInput, highlightButtonStyle } from '../style/CommonStyle'
-import "../style/Page.css"
+import TextInput from '../../components/TextInput'
+import Button from '../../components/Button'
+import { commonButtonStyle, commonStyleInput, highlightButtonStyle, registerLoginLinkStyle } from '../../style/CommonStyle'
+import TextLink from '../../components/TextLink'
 
 const FirstPage = () => {
     const dispatch = useDispatch();
+    const userData = useSelector((state) => state.user);
     const navigate = useNavigate();
-
     const [data, setData] = useState({
         nameOfUser: "",
         emailOfUser: "",
@@ -71,20 +71,36 @@ const FirstPage = () => {
         const isValidEmail = emailValidator(data.emailOfUser);
         const isValidPhone = phoneNumberValidator(data.phoneNumber);
         const isValidPassword = passwordValidator(data.password);
-        isValidEmail && isValidPassword && isValidPhone ? dispatch(storeValuesFirstPage({
+
+        if (!isValidEmail) dispatch(errorOccurred({
+            errorMessage: "Invalid Email !!!"
+        }))
+        if (!isValidPhone) dispatch(errorOccurred({
+            errorMessage: "Invalid Phone !!!"
+        }))
+        if ((!isValidPassword)) dispatch(errorOccurred({
+            errorMessage: "Invalid Password !!!"
+        }))
+
+        dispatch(storeValuesFirstPage({
             nameOfUser: data.nameOfUser,
             emailOfUser: data.emailOfUser,
             phoneNumber: data.phoneNumber,
             password: data.password,
-        })) : !isValidEmail ? dispatch(errorOccurred({
-            errorMessage: "Invalid Email"
-        })) : !isValidPhone ? dispatch(errorOccurred({
-            errorMessage: "Invalid Phone Number"
-        })) : !isValidPassword ? dispatch(errorOccurred({
-            errorMessage: "Invalid Password"
-        })) : ""
-        isValidEmail && isValidPassword && isValidPhone ? navigate("NextPage") : ""
+        }))
+
+        if (userData.errorMessage === "") dispatch(errorOccurred({
+            errorMessage: ""
+        }))
     }
+
+    useEffect(() => {
+        userData.password && userData.errorMessage === ""
+            ?
+            navigate("/NextPage")
+            :
+            navigate("/Register")
+    }, [userData]);
 
     return (
         <div id="form">
@@ -114,6 +130,14 @@ const FirstPage = () => {
                 }
                 disabled={data.btnDisabled}
                 title="Continue"
+            />
+
+            <TextLink
+                textStyle={registerLoginLinkStyle.textStyle}
+                text={"Already have account? "}
+                linkStyle={registerLoginLinkStyle.linkStyle}
+                linkText={"Sign In Here"}
+                navigateTo={"/"}
             />
         </div>
     )

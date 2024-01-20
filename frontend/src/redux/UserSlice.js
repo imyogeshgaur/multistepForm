@@ -15,8 +15,8 @@ const userSlice = createSlice({
     },
     reducers: {
         storeValuesFirstPage: (state, action) => {
-            state.firstName = action.payload.firstName;
-            state.lastName = action.payload.lastName;
+            state.nameOfUser = action.payload.nameOfUser;
+            state.emailOfUser = action.payload.emailOfUser;
             state.phoneNumber = action.payload.phoneNumber;
             state.password = action.payload.password;
         },
