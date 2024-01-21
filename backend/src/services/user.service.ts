@@ -219,10 +219,16 @@ class UserService {
                     {
                         where: { userId }
                     })
-                messageToSend = "User Updated Successfully !!!";
-                return { messageToSend, responseToSend }
+                if (update[0] == 1) {
+                    messageToSend = "User Updated Successfully !!!";
+                    return { messageToSend, responseToSend }
+                } else {
+                    messageToSend = "User Not Updated !!!";
+                    responseToSend = 401;
+                    return { messageToSend, responseToSend }
+                }
             } else {
-                messageToSend = "User Not Updated !!!";
+                messageToSend = "User Not Found !!!";
                 responseToSend = 401;
                 return { messageToSend, responseToSend };
             }
