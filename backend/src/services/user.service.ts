@@ -219,7 +219,6 @@ class UserService {
                     {
                         where: { userId }
                     })
-                console.log(update);
                 messageToSend = "User Updated Successfully !!!";
                 return { messageToSend, responseToSend }
             } else {
