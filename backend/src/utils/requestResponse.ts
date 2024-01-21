@@ -2,19 +2,19 @@ import { Response, Request } from "express"
 
 enum getDataFrom {
     'BODY' = 1,
-    'PARAMS' = 2,
-    'QUERY' = 3,
+    'HEADERS' = 2,
+    'PARAMS' = 3,
 }
 export const getResponseServiceUtil = (res: Response, messageToSend: string, responseToSend: number) => {
     return res.status(responseToSend).send({ message: messageToSend })
 }
 
-export const getDataFromResponseUtil = (req: Request, getDataFrom: getDataFrom) => {
+export const getDataFromRequestUtil = (req: Request, getDataFrom: getDataFrom) => {
     if (getDataFrom == 1) {
         return req.body;
     } else if (getDataFrom == 2) {
-        return req.params;
+        return req.headers;
     } else {
-        return req.query;
+        return req.params;
     }
 }

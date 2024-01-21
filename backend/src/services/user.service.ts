@@ -9,10 +9,41 @@ import { forgetPassword, resetPassword } from "../types/forgetReset";
 import { config } from "dotenv";
 import { resolve } from "path";
 import { forgetPasswordServiceUtil } from "../utils/forgetPassword";
-import { where } from "sequelize";
+import decodeUser from "../utils/decodeTheAuthToken";
 config({ path: resolve("./src/.env") })
 
 class UserService {
+
+    getUser = async (token: any) => {
+        try {
+            let responseToSend: number = 200;
+            let messageToSend: any;
+            const { userId }: any = decodeUser(token);
+            const isUserExist = await User.findOne({
+                where: { userId },
+                attributes: [
+                    "nameOfUser",
+                    "emailOfUser",
+                    "phoneNumber",
+                    "addressLine1",
+                    "addressLine2",
+                    "city",
+                    "pinCode"
+                ]
+            });
+            if (isUserExist) {
+                messageToSend = isUserExist.dataValues;
+                return { responseToSend, messageToSend }
+            } else {
+                messageToSend = "User Don't Exist",
+                    responseToSend = 401;
+                return { responseToSend, messageToSend }
+            }
+        } catch (error) {
+            console.log("User Service Error \n" + error)
+        }
+    }
+
     saveUser = async (data: UserData) => {
         try {
             let messageToSend = "";
@@ -63,20 +94,24 @@ class UserService {
         try {
             let messageToSend = "";
             let responseToSend = 200;
+
             const { emailOfUser, password } = data
             const isValidEmail = emailValidator(emailOfUser);
+
             if (isValidEmail) {
 
                 const isUserExist = await User.findOne({ where: { emailOfUser } });
 
                 if (!isUserExist) {
+                    console.log("Email Incorrect")
                     messageToSend = "Invalid Credentials !!!";
                     responseToSend = 401;
                     return { messageToSend, responseToSend }
                 } else {
-                    const isPasswordMatch = compare(password, isUserExist.dataValues.password)
+                    const isPasswordMatch = await compare(password, isUserExist.dataValues.password)
 
                     if (!isPasswordMatch) {
+                        console.log("Password Incorrect")
                         messageToSend = "Invalid Credentials !!!";
                         responseToSend = 401;
                         return { messageToSend, responseToSend }
@@ -167,6 +202,30 @@ class UserService {
                     messageToSend = "Password reset successfully !!!"
                     return { messageToSend, responseToSend }
                 }
+            }
+        } catch (error) {
+            console.log("User Service Error \n" + error)
+        }
+    }
+
+    updateUser = async (userId: string, dataToUpdate: any) => {
+        let messageToSend = "";
+        let responseToSend = 200;
+        try {
+            const isUserExist = await User.findOne({ where: { userId } });
+            if (isUserExist) {
+                const update = await User.update(
+                    { ...dataToUpdate },
+                    {
+                        where: { userId }
+                    })
+                console.log(update);
+                messageToSend = "User Updated Successfully !!!";
+                return { messageToSend, responseToSend }
+            } else {
+                messageToSend = "User Not Updated !!!";
+                responseToSend = 401;
+                return { messageToSend, responseToSend };
             }
         } catch (error) {
             console.log("User Service Error \n" + error)
