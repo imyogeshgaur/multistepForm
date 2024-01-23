@@ -22,6 +22,7 @@ class UserService {
             const isUserExist = await User.findOne({
                 where: { userId },
                 attributes: [
+                    "userId",
                     "nameOfUser",
                     "emailOfUser",
                     "phoneNumber",
@@ -220,7 +221,7 @@ class UserService {
                         where: { userId }
                     })
                 if (update[0] == 1) {
-                    messageToSend = "User Updated Successfully !!!";
+                    messageToSend = "User Details Updated Successfully !!!";
                     return { messageToSend, responseToSend }
                 } else {
                     messageToSend = "User Not Updated !!!";
