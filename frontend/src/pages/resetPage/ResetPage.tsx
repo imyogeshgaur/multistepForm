@@ -18,7 +18,7 @@ const ResetPage = () => {
     btnDisabled: true
   })
 
-  const handleInput = (e) => {
+  const handleInput = (e:any) => {
     const { name, value } = e.target;
     setData({
       ...data,
@@ -58,7 +58,7 @@ const ResetPage = () => {
           userId: params.userId,
           newPassword: data.password,
         }
-        const { statusFromBackend, dataFromBackend } = await callAPIOnButtonClick("POST", resetPasswordApiUrl, userData);
+        const { statusFromBackend, dataFromBackend }:any = await callAPIOnButtonClick("POST", resetPasswordApiUrl, userData);
 
         if (statusFromBackend == 200) {
           toast.success(dataFromBackend.message, {
