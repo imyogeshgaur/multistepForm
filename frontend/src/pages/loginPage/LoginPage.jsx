@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { useDispatch } from 'react-redux';
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
 import { emailValidator, passwordValidator } from '../../validator/Validator';
 import TextInput from "../../components/TextInput"
@@ -8,12 +7,16 @@ import { commonButtonStyle, commonStyleInput, forgetPasswordLinkStyle, highlight
 import callAPIOnButtonClick from '../../api/apiCall';
 import { loginApiUrl } from '../../constants/API_URL';
 import TextLink from '../../components/TextLink';
-import { errorOccurred } from '../../redux/UserSlice';
 import { Link } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
 
 const LoginPage = () => {
-    const dispatch = useDispatch();
     const navigate = useNavigate();
+    
+    useEffect(() => { 
+        const token = localStorage.getItem("token");
+        if(token && token !== undefined) navigate("/welcome")
+    }, [])
 
     const [data, setData] = useState({
         emailOrPhoneOfUser: "",
@@ -52,46 +55,58 @@ const LoginPage = () => {
     !data.emailOrPhoneOfUser || !data.password ? data.btnDisabled = true : data.btnDisabled = false;
 
     const handleSubmit = async () => {
-        const isEmail = emailValidator(data.emailOrPhoneOfUser);
-        const isPhoneNumber = passwordValidator(data.password);
-        if (isEmail) {
-            const userData = {
-                emailOfUser: data.emailOrPhoneOfUser,
-                password:data.password
-            }
-            const { statusFromBackend, dataFromBackend } = await callAPIOnButtonClick("POST", loginApiUrl, userData);
+        try {
+            const isEmail = emailValidator(data.emailOrPhoneOfUser);
+            const isPhoneNumber = passwordValidator(data.password);
+            if (isEmail) {
+                const userData = {
+                    emailOfUser: data.emailOrPhoneOfUser,
+                    password: data.password
+                }
+                const { statusFromBackend, dataFromBackend } = await callAPIOnButtonClick("POST", loginApiUrl, userData);
 
-            if (statusFromBackend == 200) {
-                console.log(dataFromBackend)
-            } else if (statusFromBackend == 401) {
-                console.log(dataFromBackend)
+                if (statusFromBackend == 200) {
+                    localStorage.setItem("token", dataFromBackend.message)
+                    navigate("/welcome")
+                }
+            } else if (isPhoneNumber) {
+                const userData = {
+                    phoneNumber: data.emailOrPhoneOfUser,
+                    password: data.password
+                }
+                const { statusFromBackend, dataFromBackend } = await callAPIOnButtonClick("POST", loginApiUrl, userData);
+
+                if (statusFromBackend == 200) {
+                    localStorage.setItem("token", dataFromBackend.message)
+                    navigate("/welcome")
+                }
             } else {
-                console.log(dataFromBackend)
+                toast.error("Invalid Credentials !!!", {
+                    position: "top-center",
+                    closeOnClick: false,
+                    closeButton: false,
+                    style: {
+                        color: "red",
+                        backgroundColor: "rgb(255, 206, 206)"
+                    }
+                })
             }
-
-        } else if (isPhoneNumber) {
-            const userData = {
-                phoneNumber: data.emailOrPhoneOfUser,
-                password:data.password
-            }
-            const { statusFromBackend, dataFromBackend } = await callAPIOnButtonClick("POST", loginApiUrl, userData);
-
-            if (statusFromBackend == 200) {
-                console.log(dataFromBackend)
-            } else if (statusFromBackend == 401) {
-                console.log(dataFromBackend)
-            } else {
-                console.log(dataFromBackend)
-            }
-        } else {
-            dispatch(errorOccurred({
-                errorMessage: "Invalid Credentials !!!"
-            }))
+        } catch (error) {
+            toast.error("Invalid Credentials !!!", {
+                position: "top-center",
+                closeOnClick: false,
+                closeButton: false,
+                style: {
+                    color: "red",
+                    backgroundColor: "rgb(255, 206, 206)"
+                }
+            })
         }
     }
 
     return (
         <div id="form">
+            <ToastContainer autoClose={1000} hideProgressBar={true} />
             {
                 propsArray.map((val) => {
                     return (
@@ -112,7 +127,7 @@ const LoginPage = () => {
                 onClick={handleSubmit}
                 style={
                     data.btnDisabled ?
-                        { ...commonButtonStyle, marginLeft: "3%",marginBottom:20 }
+                        { ...commonButtonStyle, marginLeft: "3%", marginBottom: 20 }
                         :
                         { ...highlightButtonStyle, marginLeft: "2%" }
                 }

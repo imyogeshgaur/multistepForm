@@ -7,9 +7,12 @@ import { commonButtonStyle, commonStyleInput, highlightButtonStyle } from '../..
 import { pinCodeValidator } from '../../validator/Validator';
 import callAPIOnButtonClick from '../../api/apiCall';
 import { signUpApiURL } from '../../constants/API_URL';
+import { ToastContainer, toast } from 'react-toastify';
+import { useNavigate } from 'react-router';
 
 const NextPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const userData = useSelector((state) => state.user);
   const [data, setData] = useState({
     addressLine1: "",
@@ -68,9 +71,15 @@ const NextPage = () => {
     const isValidPinCode = pinCodeValidator(data.pinCode);
 
     if (!isValidPinCode) {
-      dispatch(errorOccurred({
-        errorMessage: "Pin Code is Invalid !!!"
-      }))
+      toast.error("Pin Code Format is Incorrect !!!", {
+        position: "top-center",
+        closeOnClick: false,
+        closeButton: false,
+        style: {
+          color: "red",
+          backgroundColor: "rgb(255, 206, 206)"
+        }
+      })
       return
     }
 
@@ -86,17 +95,53 @@ const NextPage = () => {
     if (userData.pinCode && userData.errorMessage === "") {
       callAPIOnButtonClick("POST", signUpApiURL, userData).then((backendResponse) => {
         if (backendResponse.statusFromBackend === 200) {
-          console.log(backendResponse.dataFromBackend)
+          toast.success(backendResponse.dataFromBackend.message, {
+            position: "top-center",
+            closeOnClick: false,
+            closeButton: false,
+            style: {
+              color: "green",
+              backgroundColor: "rgb(183, 248, 183)"
+            }
+          })
+          setTimeout(() => {
+            navigate("/")
+          }, 1000);
         } else {
-          console.log(backendResponse.dataFromBackend)
+          toast.error(backendResponse.dataFromBackend.message, {
+            position: "top-center",
+            closeOnClick: false,
+            closeButton: false,
+            style: {
+              color: "red",
+              backgroundColor: "rgb(255, 206, 206)"
+            }
+          })
+          setTimeout(() => {
+            navigate("/NextPage")
+          }, 1000);
         }
-      }).catch(err => console.log(err))
+      }).catch(err => {
+        toast.error(err, {
+          position: "top-center",
+          closeOnClick: false,
+          closeButton: false,
+          style: {
+            color: "red",
+            backgroundColor: "rgb(255, 206, 206)"
+          }
+        })
+        setTimeout(() => {
+          navigate("/NextPage")
+        }, 1000);
+      })
     }
     data.btnDisabled = true
   }, [userData])
 
   return (
     <div id="form">
+      <ToastContainer autoClose={1000} hideProgressBar={true} />
       {
         propsArray.map((val) => {
           return (
@@ -122,6 +167,7 @@ const NextPage = () => {
         disabled={data.btnDisabled}
         title="Save"
       />
+      <ToastContainer autoClose={1000} hideProgressBar={true} />
     </div>
   )
 }

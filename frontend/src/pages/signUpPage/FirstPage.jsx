@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { phoneNumberValidator, passwordValidator, emailValidator } from '../../validator/Validator'
 import { useDispatch, useSelector } from 'react-redux'
-import { errorOccurred, storeValuesFirstPage } from '../../redux/UserSlice'
+import { storeValuesFirstPage } from '../../redux/UserSlice'
 import { useNavigate } from 'react-router'
 import TextInput from '../../components/TextInput'
 import Button from '../../components/Button'
 import { commonButtonStyle, commonStyleInput, highlightButtonStyle, registerLoginLinkStyle } from '../../style/CommonStyle'
 import TextLink from '../../components/TextLink'
+import { ToastContainer, toast } from 'react-toastify';
 
 const FirstPage = () => {
     const dispatch = useDispatch();
@@ -19,6 +20,10 @@ const FirstPage = () => {
         password: "",
         btnDisabled: true
     })
+
+    const isValidEmail = emailValidator(data.emailOfUser);
+    const isValidPhone = phoneNumberValidator(data.phoneNumber);
+    const isValidPassword = passwordValidator(data.password);
 
     const handleInput = (e) => {
         const { name, value } = e.target;
@@ -68,19 +73,33 @@ const FirstPage = () => {
     !data.nameOfUser || !data.emailOfUser || !data.password || !data.phoneNumber ? data.btnDisabled = true : data.btnDisabled = false;
 
     const handleSubmit = () => {
-        const isValidEmail = emailValidator(data.emailOfUser);
-        const isValidPhone = phoneNumberValidator(data.phoneNumber);
-        const isValidPassword = passwordValidator(data.password);
-
-        if (!isValidEmail) dispatch(errorOccurred({
-            errorMessage: "Invalid Email !!!"
-        }))
-        if (!isValidPhone) dispatch(errorOccurred({
-            errorMessage: "Invalid Phone !!!"
-        }))
-        if ((!isValidPassword)) dispatch(errorOccurred({
-            errorMessage: "Invalid Password !!!"
-        }))
+        if (!isValidEmail) toast.error("Email Format is Incorrect !!!", {
+            position: "top-center",
+            closeOnClick: false,
+            closeButton: false,
+            style: {
+                color: "red",
+                backgroundColor: "rgb(255, 206, 206)"
+            }
+        })
+        if (!isValidPhone) toast.error("Mobile Number Format is Incorrect !!!", {
+            position: "top-center",
+            closeOnClick: false,
+            closeButton: false,
+            style: {
+                color: "red",
+                backgroundColor: "rgb(255, 206, 206)"
+            }
+        })
+        if ((!isValidPassword)) toast.error("Password Format is Incorrect !!!", {
+            position: "top-center",
+            closeOnClick: false,
+            closeButton: false,
+            style: {
+                color: "red",
+                backgroundColor: "rgb(255, 206, 206)"
+            }
+        })
 
         dispatch(storeValuesFirstPage({
             nameOfUser: data.nameOfUser,
@@ -88,22 +107,29 @@ const FirstPage = () => {
             phoneNumber: data.phoneNumber,
             password: data.password,
         }))
-
-        if (userData.errorMessage === "") dispatch(errorOccurred({
-            errorMessage: ""
-        }))
     }
-
     useEffect(() => {
-        userData.password && userData.errorMessage === ""
-            ?
-            navigate("/NextPage")
-            :
-            navigate("/Register")
+        if (userData.nameOfUser !== "" && isValidEmail && isValidPassword && isValidPhone) {
+            toast.success("Data Saved Successfully !!!", {
+                position: "top-center",
+                closeOnClick: false,
+                closeButton: false,
+                style: {
+                    color: "green",
+                    backgroundColor: "rgb(183, 248, 183)"
+                }
+            })
+            setTimeout(() => {
+                navigate("/NextPage")
+            }, 1000);
+        } else {
+
+        }
     }, [userData]);
 
     return (
         <div id="form">
+            <ToastContainer autoClose={1000} hideProgressBar={true} />
             {
                 propsArray.map((val) => {
                     return (

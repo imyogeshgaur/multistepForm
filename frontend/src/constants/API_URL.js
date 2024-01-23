@@ -1,0 +1,6 @@
+export const signUpApiURL = "http://localhost:5000/v1/saveUser"
+export const loginApiUrl = "http://localhost:5000/v1/signInUser"
+export const forgetPasswordApiUrl = "http://localhost:5000/v1/forgetPassword"
+export const resetPasswordApiUrl = "http://localhost:5000/v1/resetPassword"
+export const getUserApiUrl = "http://localhost:5000/v1/getUserData"
+export const updateUserApiUrl = "http://localhost:5000/v1/updateUser"

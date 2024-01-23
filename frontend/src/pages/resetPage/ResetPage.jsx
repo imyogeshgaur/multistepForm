@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router';
 import { passwordValidator } from '../../validator/Validator';
 import TextInput from "../../components/TextInput"
@@ -7,11 +6,9 @@ import Button from "../../components/Button"
 import { commonButtonStyle, commonStyleInput, highlightButtonStyle } from '../../style/CommonStyle';
 import callAPIOnButtonClick from '../../api/apiCall';
 import { resetPasswordApiUrl } from '../../constants/API_URL';
-import { errorOccurred } from '../../redux/UserSlice';
-
+import { ToastContainer, toast } from 'react-toastify';
 
 const ResetPage = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const params = useParams();
 
@@ -32,6 +29,7 @@ const ResetPage = () => {
   const propsArray = [
     {
       key: "1",
+      type:"password",
       name: "password",
       value: data.password,
       onChange: handleInput,
@@ -40,7 +38,7 @@ const ResetPage = () => {
     },
     {
       key: "2",
-      type: "confirmPassword",
+      type: "password",
       name: "confirmPassword",
       value: data.confirmPassword,
       onChange: handleInput,
@@ -52,31 +50,57 @@ const ResetPage = () => {
   !data.password || !data.confirmPassword ? data.btnDisabled = true : data.btnDisabled = false;
 
   const handleSubmit = async () => {
-    const isPassword1 = passwordValidator(data.password);
-    const isPassword2 = passwordValidator(data.confirmPassword);
-    if (isPassword1 && isPassword2 && data.password === data.confirmPassword) {
-      const userData = {
-        userId: params.userId,
-        newPassword: data.password,
-      }
-      const { statusFromBackend, dataFromBackend } = await callAPIOnButtonClick("POST", resetPasswordApiUrl, userData);
+    try {
+      const isPassword1 = passwordValidator(data.password);
+      const isPassword2 = passwordValidator(data.confirmPassword);
+      if (isPassword1 && isPassword2 && data.password === data.confirmPassword) {
+        const userData = {
+          userId: params.userId,
+          newPassword: data.password,
+        }
+        const { statusFromBackend, dataFromBackend } = await callAPIOnButtonClick("POST", resetPasswordApiUrl, userData);
 
-      if (statusFromBackend == 200) {
-        console.log(dataFromBackend)
-      } else if (statusFromBackend == 401) {
-        console.log(dataFromBackend)
-      } else {
-        console.log(dataFromBackend)
+        if (statusFromBackend == 200) {
+          toast.success(dataFromBackend.message, {
+            position: "top-center",
+            closeOnClick: false,
+            closeButton: false,
+            style: {
+              color: "green",
+              backgroundColor: "rgb(183, 248, 183)"
+            }
+          })
+          setTimeout(() => {
+            navigate("/")
+          }, 1000);
+        } else {
+          toast.error("Password Format is Incorrect !!!", {
+            position: "top-center",
+            closeOnClick: false,
+            closeButton: false,
+            style: {
+              color: "red",
+              backgroundColor: "rgb(255, 206, 206)"
+            }
+          })
+        }
       }
-
+    } catch (error) {
+      toast.error("Some Error Occurred !!!", {
+        position: "top-center",
+        closeOnClick: false,
+        closeButton: false,
+        style: {
+          color: "red",
+          backgroundColor: "rgb(255, 206, 206)"
+        }
+      })
     }
-    dispatch(errorOccurred({
-      errorMessage: "Invalid Credentials !!!"
-    }))
   }
 
   return (
     <div id="form">
+      <ToastContainer autoClose={1000} hideProgressBar={true} />
       {
         propsArray.map((val) => {
           return (
