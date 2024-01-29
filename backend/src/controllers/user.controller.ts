@@ -33,6 +33,21 @@ class UserController {
         }
     }
 
+    getAllUsers = async () => {
+        try {
+            const headers: any = getDataFromRequestUtil(this.req, 2)
+            const userResponse: any = await this.service.getAllUsers(headers.authorization);
+            const { messageToSend, responseToSend } = userResponse;
+
+            const response = getResponseServiceUtil(this.res, messageToSend, responseToSend);
+            return response;
+        } catch (error) {
+            console.log("User Controller Error \n" + error)
+            const response = getResponseServiceUtil(this.res, this.defaultError, this.defaultErrorCode);
+            return response
+        }
+    }
+
     saveUser = async () => {
         try {
             const data: UserData = getDataFromRequestUtil(this.req, 1);

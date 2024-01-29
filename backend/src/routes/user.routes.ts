@@ -13,6 +13,15 @@ userRouter.get("/getUserData", authorization, async (req: Request, res: Response
     }
 })
 
+userRouter.get("/getAllUsers", authorization, async (req: Request, res: Response) => {
+    try {
+        const userController = new UserController(req, res);
+        await userController.getAllUsers();
+    } catch (error) {
+        console.log("Global Error : " + error)
+    }
+})
+
 userRouter.post("/saveUser", async (req: Request, res: Response) => {
     try {
         const userController = new UserController(req, res);

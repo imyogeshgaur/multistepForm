@@ -17,12 +17,12 @@ const User = sequelize.define("User", {
     emailOfUser: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique:true,
+        unique: true,
     },
     phoneNumber: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique:true,
+        unique: true,
     },
     password: {
         type: DataTypes.STRING,
@@ -43,6 +43,11 @@ const User = sequelize.define("User", {
     pinCode: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    role: {
+        type:DataTypes.STRING,
+        defaultValue:"User",
+        allowNull:false
     }
 })
 

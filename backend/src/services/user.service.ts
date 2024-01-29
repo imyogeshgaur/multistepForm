@@ -45,6 +45,37 @@ class UserService {
         }
     }
 
+    getAllUsers = async (token: any) => {
+        try {
+            let responseToSend: number = 200;
+            let messageToSend: any;
+            const { userId }: any = decodeUser(token);
+            const isUserExist = await User.findOne({ where: { userId } });
+            if (isUserExist) {
+                const allUsers = await User.findAll({
+                    where: { role: "User" },
+                    attributes: [
+                        "userId",
+                        "nameOfUser",
+                        "emailOfUser",
+                        "phoneNumber",
+                        "addressLine1",
+                        "addressLine2",
+                        "city",
+                        "pinCode"
+                    ]
+                })
+                console.log(allUsers)
+                messageToSend = allUsers;
+                return { messageToSend, responseToSend }
+            }
+            messageToSend = "No user found !!!"
+            return { messageToSend, responseToSend }
+        } catch (error) {
+            console.log("User Service Error \n" + error)
+        }
+    }
+
     saveUser = async (data: UserData) => {
         try {
             let messageToSend = "";
